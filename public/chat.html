@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f3f3f3;
+            --bg-tertiary: #e8e8e8;
+            --bg-hover: #d4d4d4;
+            --border-color: #d4d4d4;
+            --text-primary: #333333;
+            --text-secondary: #6e6e6e;
+            --accent: #0066b8;
+            --accent-hover: #005a9e;
+            --success: #107c10;
+            --error: #d32f2f;
+            --user-msg-bg: #e5f1fb;
+            --assistant-msg-bg: #f5f5f5;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-title .icon {
+            font-size: 20px;
+        }
+
+        .model-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .model-selector label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .model-selector select {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .provider-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .provider-selector label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .provider-selector select {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 12px;
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background: var(--bg-primary);
+        }
+
+        .welcome-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-secondary);
+            text-align: center;
+            gap: 16px;
+        }
+
+        .welcome-icon {
+            font-size: 48px;
+            opacity: 0.6;
+        }
+
+        .welcome-text {
+            font-size: 16px;
+        }
+
+        .welcome-hint {
+            font-size: 13px;
+            color: var(--text-secondary);
+            opacity: 0.8;
+        }
+
+        .chat-message {
+            display: flex;
+            gap: 12px;
+            max-width: 85%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .chat-message.assistant {
+            align-self: flex-start;
+        }
+
+        .chat-message.error {
+            align-self: center;
+            max-width: 100%;
+        }
+
+        .chat-avatar {
+            font-size: 24px;
+            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            border-radius: 50%;
+        }
+
+        .chat-content {
+            flex: 1;
+            min-width: 0;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.6;
+        }
+
+        .chat-message.user .chat-content {
+            background: var(--user-msg-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .chat-message.assistant .chat-content {
+            background: var(--assistant-msg-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .chat-message.error .chat-content {
+            background: #ffebee;
+            border: 1px solid #ffcdd2;
+            color: var(--error);
+            text-align: center;
+        }
+
+        .chat-role {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .chat-text {
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .chat-message.user .chat-text {
+            white-space: pre-wrap;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 8px 0;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: var(--text-secondary);
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+            30% {
+                transform: translateY(-8px);
+                opacity: 1;
+            }
+        }
+
+        .input-container {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 16px 20px;
+            flex-shrink: 0;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .message-input {
+            flex: 1;
+            min-height: 44px;
+            max-height: 200px;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: none;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(0, 102, 184, 0.1);
+        }
+
+        .message-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .send-button {
+            padding: 12px 24px;
+            background: var(--accent);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .send-button:hover:not(:disabled) {
+            background: var(--accent-hover);
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .send-button .icon {
+            font-size: 16px;
+        }
+
+        .status-bar {
+            background: var(--bg-tertiary);
+            border-top: 1px solid var(--border-color);
+            padding: 8px 20px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        .status-dot.error {
+            background: var(--error);
+        }
+
+        .status-dot.connecting {
+            background: #ffa726;
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-dot.loading {
+            background: #ffa726;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .loading-spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--bg-tertiary);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .retry-button {
+            padding: 8px 16px;
+            background: var(--accent);
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .retry-button:hover {
+            background: var(--accent-hover);
+        }
+
+        .current-config {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 11px;
+        }
+
+        .config-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .config-label {
+            color: var(--text-secondary);
+        }
+
+        .config-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .token-info {
+            display: flex;
+            gap: 16px;
+        }
+
+        .token-stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .token-label {
+            color: var(--text-secondary);
+        }
+
+        .token-value {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        /* Markdown styles */
+        .markdown-body {
+            line-height: 1.6;
+        }
+
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+            color: #0451a5;
+        }
+
+        .markdown-body h1 {
+            font-size: 1.3em;
+        }
+
+        .markdown-body h2 {
+            font-size: 1.2em;
+        }
+
+        .markdown-body h3 {
+            font-size: 1.1em;
+        }
+
+        .markdown-body p {
+            margin-bottom: 0.8em;
+        }
+
+        .markdown-body ul, .markdown-body ol {
+            padding-left: 1.5em;
+            margin-bottom: 0.8em;
+        }
+
+        .markdown-body li {
+            margin-bottom: 0.2em;
+        }
+
+        .markdown-body code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            padding: 0.15em 0.4em;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            color: #a31515;
+        }
+
+        .markdown-body pre {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            padding: 12px;
+            overflow-x: auto;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 0.8em;
+        }
+
+        .markdown-body pre code {
+            background: transparent;
+            padding: 0;
+            border: none;
+            color: var(--text-primary);
+        }
+
+        .markdown-body blockquote {
+            border-left: 3px solid var(--accent);
+            padding-left: 0.8em;
+            color: var(--text-secondary);
+            margin-bottom: 0.8em;
+        }
+
+        .markdown-body strong {
+            font-weight: 600;
+            color: #098658;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-hover);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a0a0a0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                max-width: 100%;
+            }
+
+            .chat-message {
+                max-width: 90%;
+            }
+
+            .header {
+                padding: 10px 16px;
+            }
+
+            .chat-container {
+                padding: 16px;
+            }
+
+            .input-container {
+                padding: 12px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-title">
+                <span class="icon">💬</span>
+                <span>AI Chat</span>
+            </div>
+            <div class="header-controls">
+                <div class="provider-selector">
+                    <label for="provider">Provider:</label>
+                    <select id="provider"></select>
+                </div>
+                <div class="model-selector">
+                    <label for="model">Model:</label>
+                    <select id="model"></select>
+                </div>
+            </div>
+        </header>
+
+        <div class="chat-container" id="chat-container">
+            <div class="welcome-message">
+                <div class="welcome-icon">🤖</div>
+                <div class="welcome-text">Welcome to AI Chat</div>
+                <div class="welcome-hint">Type a message below to start chatting</div>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <div class="input-wrapper">
+                <textarea 
+                    class="message-input" 
+                    id="message-input" 
+                    placeholder="Type your message here... (Press Enter to send, Shift+Enter for new line)"
+                    rows="1"
+                ></textarea>
+                <button class="send-button" id="send-button">
+                    <span class="icon">➤</span>
+                    <span>Send</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot" id="status-dot"></div>
+                <span id="status-text">正在加载配置...</span>
+            </div>
+            <div class="current-config" id="current-config">
+                <div class="config-item">
+                    <span class="config-label">Provider:</span>
+                    <span class="config-value" id="config-provider">-</span>
+                </div>
+                <div class="config-item">
+                    <span class="config-label">Model:</span>
+                    <span class="config-value" id="config-model">-</span>
+                </div>
+            </div>
+            <div class="token-info">
+                <div class="token-stat">
+                    <span class="token-label">Input:</span>
+                    <span class="token-value" id="token-input">0</span>
+                </div>
+                <div class="token-stat">
+                    <span class="token-label">Output:</span>
+                    <span class="token-value" id="token-output">0</span>
+                </div>
+                <div class="token-stat">
+                    <span class="token-label">Total:</span>
+                    <span class="token-value" id="token-total">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div id="loading-text">正在加载配置...</div>
+        <button class="retry-button" id="retry-button" style="display: none;">重试</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const providerSelect = document.getElementById('provider');
+        const modelSelect = document.getElementById('model');
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+        const tokenInput = document.getElementById('token-input');
+        const tokenOutput = document.getElementById('token-output');
+        const tokenTotal = document.getElementById('token-total');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const loadingText = document.getElementById('loading-text');
+        const retryButton = document.getElementById('retry-button');
+        const configProvider = document.getElementById('config-provider');
+        const configModel = document.getElementById('config-model');
+        const currentConfigEl = document.getElementById('current-config');
+
+        let messages = [];
+        let isStreaming = false;
+        let currentProvider = '';
+        let currentModel = '';
+        let currentProviderName = '';
+        let currentModelName = '';
+        let providersData = {};
+        let configLoadState = 'loading';
+        let previousModels = [];
+
+        function showLoadingOverlay(text, showRetry = false) {
+            loadingText.textContent = text;
+            loadingOverlay.style.display = 'flex';
+            retryButton.style.display = showRetry ? 'block' : 'none';
+        }
+
+        function hideLoadingOverlay() {
+            loadingOverlay.style.display = 'none';
+        }
+
+        function updateCurrentConfig() {
+            if (currentProvider && currentProviderName) {
+                configProvider.textContent = currentProviderName;
+            } else {
+                configProvider.textContent = '-';
+            }
+            if (currentModel && currentModelName) {
+                configModel.textContent = currentModelName;
+            } else {
+                configModel.textContent = '-';
+            }
+        }
+
+        function setLoadingState() {
+            configLoadState = 'loading';
+            setStatus('正在加载配置...', 'loading');
+            providerSelect.disabled = true;
+            modelSelect.disabled = true;
+            sendButton.disabled = true;
+            messageInput.disabled = true;
+            showLoadingOverlay('正在加载配置...');
+        }
+
+        function setErrorState(message) {
+            configLoadState = 'error';
+            setStatus(message, 'error');
+            providerSelect.disabled = true;
+            modelSelect.disabled = true;
+            sendButton.disabled = true;
+            messageInput.disabled = true;
+            showLoadingOverlay(message, true);
+        }
+
+        function setEmptyState() {
+            configLoadState = 'empty';
+            setStatus('无可用供应商', 'error');
+            providerSelect.disabled = true;
+            modelSelect.disabled = true;
+            sendButton.disabled = true;
+            messageInput.disabled = true;
+            showLoadingOverlay('无可用供应商', false);
+            currentConfigEl.style.display = 'none';
+        }
+
+        function setSuccessState() {
+            configLoadState = 'success';
+            setStatus('就绪');
+            providerSelect.disabled = false;
+            modelSelect.disabled = false;
+            sendButton.disabled = false;
+            messageInput.disabled = false;
+            hideLoadingOverlay();
+            currentConfigEl.style.display = 'flex';
+        }
+
+        async function initSelectors() {
+            setLoadingState();
+
+            try {
+                const response = await fetch('/admin/config');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                const result = await response.json();
+
+                if (!result.success || !result.data) {
+                    throw new Error('Invalid response format');
+                }
+
+                const data = result.data;
+
+                if (!data.providers || Object.keys(data.providers).length === 0) {
+                    setEmptyState();
+                    return;
+                }
+
+                providersData = data.providers;
+
+                providerSelect.innerHTML = '';
+                Object.entries(data.providers).forEach(([providerId, provider]) => {
+                    const option = document.createElement('option');
+                    option.value = providerId;
+                    option.textContent = provider.name || providerId;
+                    providerSelect.appendChild(option);
+                });
+
+                const providerIds = Object.keys(data.providers);
+                if (providerIds.length > 0) {
+                    currentProvider = providerIds[0];
+                    currentProviderName = data.providers[currentProvider].name || currentProvider;
+                    loadModels(currentProvider);
+                }
+
+                setSuccessState();
+                updateCurrentConfig();
+            } catch (error) {
+                console.error('Failed to initialize selectors:', error);
+                setErrorState('加载配置失败: ' + error.message);
+            }
+        }
+
+        function loadModels(providerId) {
+            modelSelect.disabled = true;
+            setStatus('正在加载模型...', 'loading');
+
+            try {
+                const provider = providersData[providerId];
+                if (!provider) {
+                    throw new Error('Provider not found');
+                }
+
+                const models = provider.models || [];
+
+                modelSelect.innerHTML = '';
+                if (models.length > 0) {
+                    previousModels = models;
+                    models.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model.id;
+                        option.textContent = model.name;
+                        if (model.description) {
+                            option.title = model.description;
+                        }
+                        modelSelect.appendChild(option);
+                    });
+
+                    // 使用 defaultModel 如果设置了，否则使用第一个模型
+                    if (provider.defaultModel && models.find(m => m.id === provider.defaultModel)) {
+                        currentModel = provider.defaultModel;
+                        const defaultModel = models.find(m => m.id === provider.defaultModel);
+                        currentModelName = defaultModel ? defaultModel.name : currentModel;
+                        modelSelect.value = currentModel;
+                    } else {
+                        currentModel = models[0].id;
+                        currentModelName = models[0].name;
+                    }
+
+                    modelSelect.disabled = false;
+                    setStatus('就绪');
+                } else {
+                    modelSelect.innerHTML = '<option value="">无可用模型</option>';
+                    currentModel = '';
+                    currentModelName = '无可用模型';
+                    setStatus('无可用模型', 'error');
+                }
+                updateCurrentConfig();
+            } catch (error) {
+                console.error('Failed to load models:', error);
+                if (previousModels.length > 0) {
+                    modelSelect.innerHTML = '';
+                    previousModels.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model.id;
+                        option.textContent = model.name;
+                        if (model.description) {
+                            option.title = model.description;
+                        }
+                        modelSelect.appendChild(option);
+                    });
+                    setStatus('模型加载失败，使用缓存', 'error');
+                } else {
+                    modelSelect.innerHTML = '<option value="">加载失败</option>';
+                    setStatus('模型加载失败', 'error');
+                }
+                modelSelect.disabled = false;
+            }
+        }
+
+        function onProviderChange() {
+            currentProvider = providerSelect.value;
+            const providerInfo = providersData[currentProvider];
+            currentProviderName = providerInfo ? providerInfo.name : currentProvider;
+            loadModels(currentProvider);
+        }
+
+        providerSelect.addEventListener('change', onProviderChange);
+
+        modelSelect.addEventListener('change', () => {
+            currentModel = modelSelect.value;
+            const selectedOption = modelSelect.options[modelSelect.selectedIndex];
+            currentModelName = selectedOption.text;
+            updateCurrentConfig();
+        });
+
+        retryButton.addEventListener('click', () => {
+            initSelectors();
+        });
+
+        function setStatus(status, type = 'ready') {
+            statusText.textContent = status;
+            statusDot.className = 'status-dot';
+            if (type === 'error') {
+                statusDot.classList.add('error');
+            } else if (type === 'loading') {
+                statusDot.classList.add('loading');
+            } else if (type === 'connecting') {
+                statusDot.classList.add('connecting');
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function renderMarkdown(text) {
+            if (typeof marked !== 'undefined') {
+                try {
+                    marked.setOptions({
+                        breaks: true,
+                        gfm: true
+                    });
+                    return marked.parse(text);
+                } catch (e) {
+                    console.error('Markdown parsing error:', e);
+                    return escapeHtml(text);
+                }
+            }
+            return escapeHtml(text);
+        }
+
+        function addMessage(role, content, isError = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${role}${isError ? ' error' : ''}`;
+
+            const avatar = role === 'user' ? '👤' : '🤖';
+            const roleLabel = role === 'user' ? '你' : 'AI';
+
+            let contentHtml = '';
+            if (role === 'assistant' && !isError) {
+                contentHtml = `<div class="markdown-body">${renderMarkdown(content)}</div>`;
+            } else {
+                contentHtml = `<div class="chat-text">${escapeHtml(content)}</div>`;
+            }
+
+            messageDiv.innerHTML = `
+                <div class="chat-avatar">${avatar}</div>
+                <div class="chat-content">
+                    <div class="chat-role">${roleLabel}</div>
+                    ${contentHtml}
+                </div>
+            `;
+
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            return messageDiv;
+        }
+
+        function addTypingIndicator() {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message assistant';
+            messageDiv.id = 'typing-indicator';
+
+            messageDiv.innerHTML = `
+                <div class="chat-avatar">🤖</div>
+                <div class="chat-content">
+                    <div class="chat-role">AI</div>
+                    <div class="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            `;
+
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            return messageDiv;
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        function updateTokenUsage(usage) {
+            if (usage) {
+                tokenInput.textContent = usage.prompt_tokens || 0;
+                tokenOutput.textContent = usage.completion_tokens || 0;
+                tokenTotal.textContent = usage.total_tokens || 0;
+            }
+        }
+
+        async function sendMessage() {
+            if (configLoadState !== 'success') return;
+            
+            const content = messageInput.value.trim();
+            if (!content || isStreaming) return;
+
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+
+            addMessage('user', content);
+            messages.push({ role: 'user', content });
+
+            isStreaming = true;
+            sendButton.disabled = true;
+            setStatus('发送中...', 'connecting');
+
+            addTypingIndicator();
+
+            try {
+                const response = await fetch(`/chat?provider=${encodeURIComponent(currentProvider)}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Provider': currentProvider
+                    },
+                    body: JSON.stringify({
+                        model: modelSelect.value,
+                        messages: messages
+                    })
+                });
+
+                removeTypingIndicator();
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                let assistantMessage = '';
+                
+                if (data.choices && data.choices[0]) {
+                    assistantMessage = data.choices[0].message.content;
+                    updateTokenUsage(data.usage);
+                } else if (data.content && Array.isArray(data.content)) {
+                    assistantMessage = data.content
+                        .filter((block) => block.type === 'text')
+                        .map((block) => block.text)
+                        .join('');
+                    updateTokenUsage(data.usage);
+                } else if (data.error) {
+                    throw new Error(data.error.message || data.error);
+                } else {
+                    throw new Error('无效的响应格式');
+                }
+                
+                if (assistantMessage) {
+                    addMessage('assistant', assistantMessage);
+                    messages.push({ role: 'assistant', content: assistantMessage });
+                    setStatus('就绪');
+                } else {
+                    throw new Error('无效的响应格式');
+                }
+            } catch (error) {
+                removeTypingIndicator();
+                addMessage('error', `错误: ${error.message}`, true);
+                setStatus('错误', 'error');
+                console.error('Chat error:', error);
+            } finally {
+                isStreaming = false;
+                sendButton.disabled = false;
+                messageInput.focus();
+            }
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        messageInput.addEventListener('input', () => {
+            messageInput.style.height = 'auto';
+            messageInput.style.height = Math.min(messageInput.scrollHeight, 200) + 'px';
+        });
+
+        initSelectors();
+        messageInput.focus();
+    </script>
+</body>
+</html>

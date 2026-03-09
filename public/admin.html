@@ -1,0 +1,2291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - API Gateway</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #f8f9fa;
+            --bg-white: #ffffff;
+            --bg-card: #ffffff;
+            --border-color: #e5e7eb;
+            --border-light: #f3f4f6;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --accent-purple: #8b5cf6;
+            --accent-purple-light: #a78bfa;
+            --accent-purple-dark: #7c3aed;
+            --success: #10b981;
+            --success-bg: #d1fae5;
+            --error: #ef4444;
+            --error-bg: #fee2e2;
+            --warning: #f59e0b;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Styles */
+        .header {
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-purple-dark) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .header-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.025em;
+        }
+
+        .header-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 12px;
+        }
+
+        .nav-link {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-white);
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-link:hover {
+            background: var(--bg-primary);
+            border-color: var(--accent-purple-light);
+            color: var(--accent-purple);
+        }
+
+        .nav-link.active {
+            background: var(--accent-purple);
+            border-color: var(--accent-purple);
+            color: #ffffff;
+        }
+
+        /* Main Container */
+        .main-container {
+            flex: 1;
+            padding: 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Section Card */
+        .section-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .section-header {
+            padding: 24px 32px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-purple-dark) 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .section-title-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .section-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-white);
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: var(--bg-primary);
+            border-color: var(--accent-purple-light);
+        }
+
+        .btn-primary {
+            background: var(--accent-purple);
+            border-color: var(--accent-purple);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-purple-dark);
+            border-color: var(--accent-purple-dark);
+        }
+
+        .btn-secondary {
+            background: var(--bg-white);
+            border-color: var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-primary);
+            border-color: var(--accent-purple-light);
+            color: var(--accent-purple);
+        }
+
+        .btn-danger {
+            background: var(--error-bg);
+            border-color: var(--error);
+            color: var(--error);
+        }
+
+        .btn-danger:hover {
+            background: var(--error);
+            color: #ffffff;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        .btn-icon {
+            padding: 8px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 6px;
+        }
+
+        .btn-icon:hover {
+            background: var(--bg-primary);
+            color: var(--accent-purple);
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table thead {
+            background: var(--bg-primary);
+        }
+
+        .data-table th {
+            padding: 14px 24px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .data-table td {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .data-table tbody tr:hover {
+            background: var(--bg-primary);
+        }
+
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Provider Cell */
+        .provider-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .provider-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-purple-dark) 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+
+        .provider-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .provider-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .provider-id {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .tag-purple {
+            background: #ede9fe;
+            color: var(--accent-purple-dark);
+        }
+
+        .tag-green {
+            background: var(--success-bg);
+            color: #065f46;
+        }
+
+        .tag-gray {
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+        }
+
+        /* Models Tag - Clickable */
+        .models-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .models-tag:hover {
+            background: #ede9fe;
+            color: var(--accent-purple-dark);
+            border-color: var(--accent-purple-light);
+        }
+
+        .models-tag-icon {
+            font-size: 14px;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: var(--success-bg);
+            color: #065f46;
+        }
+
+        .status-inactive {
+            background: #f3f4f6;
+            color: var(--text-secondary);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--bg-white);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 480px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            transform: scale(0.95);
+            transition: transform 0.2s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 24px 24px 0;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+
+        .modal-title-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .modal-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            max-height: calc(90vh - 200px);
+        }
+
+        .modal-footer {
+            padding: 16px 24px 24px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .form-label .required {
+            color: var(--error);
+            margin-left: 2px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--bg-white);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--bg-white);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 40px;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .form-error {
+            font-size: 12px;
+            color: var(--error);
+            margin-top: 6px;
+        }
+
+        /* Toggle Switch */
+        .toggle-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            border: 1px solid var(--border-light);
+        }
+
+        .toggle-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .toggle-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .toggle-hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .toggle-switch.active {
+            background: var(--accent-purple);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(20px);
+        }
+
+        /* Token Input */
+        .token-input-wrapper {
+            position: relative;
+            display: flex;
+            gap: 8px;
+        }
+
+        .token-input-wrapper .form-input {
+            flex: 1;
+        }
+
+        .btn-toggle {
+            padding: 10px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-white);
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-toggle:hover {
+            background: var(--bg-primary);
+            border-color: var(--accent-purple-light);
+            color: var(--accent-purple);
+        }
+
+        /* Notification */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .notification {
+            padding: 14px 18px;
+            border-radius: 10px;
+            background: var(--bg-white);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            max-width: 400px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--error);
+        }
+
+        .notification.loading {
+            border-left: 4px solid var(--accent-purple);
+        }
+
+        .notification-icon {
+            font-size: 20px;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .notification-message {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .empty-state-hint {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Configure Models Modal */
+        .models-modal {
+            max-width: 560px;
+        }
+
+        .models-modal .modal-body {
+            padding: 0;
+            max-height: calc(90vh - 180px);
+        }
+
+        .models-list {
+            padding: 16px 24px;
+        }
+
+        .model-group {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .model-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .model-group-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: var(--bg-primary);
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .model-group-header:hover {
+            background: #f3f4f6;
+        }
+
+        .model-group-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .model-group-toggle {
+            font-size: 12px;
+            color: var(--text-muted);
+            transition: transform 0.2s ease;
+        }
+
+        .model-group.expanded .model-group-toggle {
+            transform: rotate(180deg);
+        }
+
+        .model-group-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-purple-dark) 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .model-group-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .model-group-header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .model-count-badge {
+            padding: 4px 10px;
+            background: var(--success-bg);
+            color: #065f46;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 6px;
+        }
+
+        .btn-all-selected {
+            padding: 6px 14px;
+            background: var(--text-primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-all-selected:hover {
+            background: #374151;
+        }
+
+        .btn-all-selected.not-selected {
+            background: var(--bg-white);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .model-group-content {
+            display: none;
+            padding: 12px 16px;
+            background: var(--bg-white);
+        }
+
+        .model-group.expanded .model-group-content {
+            display: block;
+        }
+
+        .model-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            background: var(--bg-white);
+            transition: all 0.2s ease;
+        }
+
+        .model-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .model-item:hover {
+            border-color: var(--accent-purple-light);
+            background: #faf5ff;
+        }
+
+        .model-item-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .model-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .model-checkbox:hover {
+            border-color: var(--accent-purple);
+        }
+
+        .model-checkbox.checked {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .model-checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .model-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .model-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .model-id {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .models-modal-footer {
+            padding: 16px 24px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .models-selected-count {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .models-selected-count strong {
+            color: var(--text-primary);
+        }
+
+        .models-modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-save-selection {
+            padding: 10px 20px;
+            background: var(--text-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-save-selection:hover {
+            background: #374151;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 12px 16px;
+            }
+
+            .header-left {
+                gap: 12px;
+            }
+
+            .logo {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+
+            .header-title {
+                font-size: 16px;
+            }
+
+            .header-subtitle {
+                display: none;
+            }
+
+            .main-container {
+                padding: 16px;
+            }
+
+            .section-header {
+                padding: 16px 20px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 12px 16px;
+            }
+
+            .modal {
+                max-width: 100%;
+                margin: 16px;
+            }
+
+            .modal-header,
+            .modal-body,
+            .modal-footer {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">⚡</div>
+            <div class="header-brand">
+                <div class="header-title">API Gateway Admin</div>
+                <div class="header-subtitle">Manage your LLM providers and configurations</div>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <a href="/chat.html" class="nav-link">
+                <span>💬</span>
+                <span>Chat</span>
+            </a>
+            <a href="/index.html" class="nav-link">
+                <span>🐛</span>
+                <span>Debug</span>
+            </a>
+            <a href="/admin.html" class="nav-link active">
+                <span>⚙️</span>
+                <span>Admin</span>
+            </a>
+        </nav>
+    </header>
+
+    <main class="main-container">
+        <!-- Provider Management Section -->
+        <section class="section-card">
+            <div class="section-header">
+                <div class="section-title-wrapper">
+                    <div class="section-icon">🔌</div>
+                    <div class="section-title-group">
+                        <div class="section-title">Provider Management</div>
+                        <div class="section-description">Configure and manage your LLM API providers</div>
+                    </div>
+                </div>
+                <div class="section-actions">
+                    <button class="btn btn-secondary" onclick="exportConfig()">
+                        <span>📥</span>
+                        <span>Export Config</span>
+                    </button>
+                    <button class="btn btn-primary" id="add-provider-btn">
+                        <span>+</span>
+                        <span>Add Provider</span>
+                    </button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Provider</th>
+                            <th>Endpoint</th>
+                            <th>Protocol</th>
+                            <th>Models</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="provider-table-body">
+                        <tr>
+                            <td colspan="6">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">🔌</div>
+                                    <div class="empty-state-title">No providers configured</div>
+                                    <div class="empty-state-hint">Click "Add Provider" to configure a new provider</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Add Provider Modal -->
+    <div class="modal-overlay" id="add-provider-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <div class="modal-title">Add New Provider</div>
+                    <div class="modal-subtitle">Configure a new LLM API provider</div>
+                </div>
+                <button class="modal-close" onclick="closeModal('add-provider-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-provider-form">
+                    <div class="form-group">
+                        <label class="form-label">Display Name <span class="required">*</span></label>
+                        <input type="text" class="form-input" id="provider-name" placeholder="e.g., OpenAI">
+                        <div class="form-hint">A friendly name shown in the interface</div>
+                        <div class="form-error" id="provider-name-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Provider ID <span class="required">*</span></label>
+                        <input type="text" class="form-input" id="provider-id" placeholder="e.g., openai">
+                        <div class="form-hint">Internal identifier (lowercase, no spaces)</div>
+                        <div class="form-error" id="provider-id-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Endpoint <span class="required">*</span></label>
+                        <input type="text" class="form-input" id="provider-host" placeholder="e.g., api.openai.com">
+                        <div class="form-hint">API endpoint URL</div>
+                        <div class="form-error" id="provider-host-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Protocol <span class="required">*</span></label>
+                        <select class="form-select" id="provider-protocol">
+                            <option value="openai">OpenAI Compatible</option>
+                            <option value="anthropic">Anthropic</option>
+                        </select>
+                        <div class="form-hint">API protocol type</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Base Path <span class="required">*</span></label>
+                        <input type="text" class="form-input" id="provider-basepath" placeholder="e.g., /v1">
+                        <div class="form-hint">API base path</div>
+                        <div class="form-error" id="provider-basepath-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <input type="text" class="form-input" id="provider-description" placeholder="Optional description">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('add-provider-modal')">Cancel</button>
+                <button class="btn btn-primary" onclick="submitAddProvider()">Add Provider</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Provider Modal -->
+    <div class="modal-overlay" id="edit-provider-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <div class="modal-title">Edit Provider</div>
+                    <div class="modal-subtitle">Update provider configuration</div>
+                </div>
+                <button class="modal-close" onclick="closeModal('edit-provider-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-provider-form">
+                    <input type="hidden" id="edit-provider-id">
+                    <div class="form-group">
+                        <label class="form-label">Display Name <span class="required">*</span></label>
+                        <input type="text" class="form-input" id="edit-provider-name" placeholder="e.g., OpenAI">
+                        <div class="form-hint">A friendly name shown in the interface</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Provider Name <span class="required">*</span></label>
+                        <input type="text" class="form-input" id="edit-provider-id-display" readonly>
+                        <div class="form-hint">Internal identifier (cannot be changed)</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Endpoint <span class="required">*</span></label>
+                        <input type="text" class="form-input" id="edit-provider-host" placeholder="e.g., api.openai.com">
+                        <div class="form-hint">API endpoint URL</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Protocol <span class="required">*</span></label>
+                        <select class="form-select" id="edit-provider-protocol">
+                            <option value="openai">OpenAI Compatible</option>
+                            <option value="anthropic">Anthropic</option>
+                        </select>
+                        <div class="form-hint">API protocol type</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">API Token <span class="required">*</span></label>
+                        <div class="token-input-wrapper">
+                            <input type="password" class="form-input" id="edit-provider-token" placeholder="Enter API token">
+                            <button type="button" class="btn-toggle" onclick="toggleEditTokenVisibility()">Show</button>
+                        </div>
+                        <div class="form-hint">API authentication token or key</div>
+                    </div>
+                    <div class="form-group">
+                        <div class="toggle-wrapper">
+                            <div class="toggle-info">
+                                <div class="toggle-label">Set as Default Provider</div>
+                                <div class="toggle-hint">Use this provider by default for new requests</div>
+                            </div>
+                            <div class="toggle-switch" id="edit-provider-default-toggle" onclick="toggleDefaultProvider()"></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('edit-provider-modal')">Cancel</button>
+                <button class="btn btn-primary" onclick="submitEditProvider()">
+                    <span>✓</span>
+                    <span>Update Provider</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configure Models Modal -->
+    <div class="modal-overlay" id="configure-models-modal">
+        <div class="modal models-modal">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <div class="modal-title">Configure Models</div>
+                    <div class="modal-subtitle" id="configure-models-subtitle">Select models for provider</div>
+                </div>
+                <button class="modal-close" onclick="closeModal('configure-models-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="models-list" id="models-list">
+                    <!-- Model groups will be rendered here -->
+                </div>
+            </div>
+            <div class="models-modal-footer">
+                <div class="models-selected-count">
+                    <strong id="selected-models-count">0</strong> model(s) selected
+                </div>
+                <div class="models-modal-actions">
+                    <button class="btn btn-secondary" onclick="closeModal('configure-models-modal')">Cancel</button>
+                    <button class="btn-save-selection" onclick="saveModelSelection()">
+                        <span>✓</span>
+                        <span>Save Selection</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Dialog -->
+    <div class="modal-overlay confirm-dialog" id="confirm-modal">
+        <div class="modal" style="max-width: 400px;">
+            <div class="modal-body" style="text-align: center; padding: 32px 24px;">
+                <div style="font-size: 48px; margin-bottom: 16px;" id="confirm-icon">⚠️</div>
+                <div style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;" id="confirm-message">Are you sure?</div>
+                <div style="font-size: 14px; color: var(--text-secondary);" id="confirm-hint"></div>
+            </div>
+            <div class="modal-footer" style="justify-content: center; padding-top: 0;">
+                <button class="btn btn-secondary" onclick="closeModal('confirm-modal')">Cancel</button>
+                <button class="btn btn-danger" id="confirm-btn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div class="notification-container" id="notification-container"></div>
+
+    <script>
+        // Global state
+        let providers = {};
+        let currentProviderId = null;
+        let editingProviderId = null;
+        let isDefaultProvider = false;
+        let configuringProviderId = null;
+        let selectedModels = new Set();
+        let expandedGroups = new Set();
+
+        // Initialize
+        console.log('[DEBUG] Script loaded, waiting for DOMContentLoaded...');
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('[DEBUG] DOMContentLoaded fired');
+            initAdminPage();
+        });
+
+        function initAdminPage() {
+            loadProviders();
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            document.getElementById('add-provider-btn').addEventListener('click', function() {
+                openModal('add-provider-modal');
+            });
+        }
+
+        // ==================== API Functions ====================
+
+        async function loadProviders() {
+            console.log('[DEBUG] loadProviders() started');
+            showNotification('Loading providers...', 'loading');
+            
+            try {
+                console.log('[DEBUG] Fetching /admin/config...');
+                const response = await fetch('/admin/config', {
+                    method: 'GET',
+                    cache: 'no-cache'
+                });
+                
+                console.log('[DEBUG] Response received:', response.status, response.statusText);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                console.log('[DEBUG] Response parsed:', result);
+                
+                if (result.success) {
+                    providers = result.data.providers || {};
+                    currentProviderId = result.data.currentProvider;
+                    console.log('[DEBUG] Providers loaded:', Object.keys(providers).length);
+                    console.log('[DEBUG] Current provider:', currentProviderId);
+                    renderProviderTable();
+                    clearLoadingNotification();
+                    showNotification('Providers loaded successfully', 'success');
+                } else {
+                    console.error('[DEBUG] API returned error:', result.error);
+                    clearLoadingNotification();
+                    showNotification('Failed to load providers: ' + result.error, 'error');
+                    renderProviderTable();
+                }
+            } catch (error) {
+                console.error('[DEBUG] Exception caught:', error);
+                console.error('[DEBUG] Error stack:', error.stack);
+                clearLoadingNotification();
+                showNotification('Error loading providers: ' + error.message, 'error');
+                renderProviderTable();
+            }
+        }
+
+        async function addProvider(providerData) {
+            showNotification('Adding provider...', 'loading');
+            try {
+                const response = await fetch('/admin/providers', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(providerData)
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    clearLoadingNotification();
+                    showNotification('Provider added successfully', 'success');
+                    closeModal('add-provider-modal');
+                    document.getElementById('add-provider-form').reset();
+                    loadProviders();
+                } else {
+                    clearLoadingNotification();
+                    showNotification('Failed to add provider: ' + result.error, 'error');
+                }
+            } catch (error) {
+                clearLoadingNotification();
+                showNotification('Error adding provider: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteProvider(providerId) {
+            showNotification('Deleting provider...', 'loading');
+            try {
+                const response = await fetch(`/admin/providers/${providerId}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    clearLoadingNotification();
+                    showNotification('Provider deleted successfully', 'success');
+                    loadProviders();
+                } else {
+                    clearLoadingNotification();
+                    showNotification('Failed to delete provider: ' + result.error, 'error');
+                }
+            } catch (error) {
+                clearLoadingNotification();
+                showNotification('Error deleting provider: ' + error.message, 'error');
+            }
+        }
+
+        async function submitEditProvider() {
+            const providerId = document.getElementById('edit-provider-id').value;
+            const newToken = document.getElementById('edit-provider-token').value.trim();
+            
+            const providerData = {
+                config: {
+                    name: document.getElementById('edit-provider-name').value.trim(),
+                    targetHost: document.getElementById('edit-provider-host').value.trim(),
+                    targetProtocol: 'https',
+                    protocol: document.getElementById('edit-provider-protocol').value,
+                    basePath: document.getElementById('edit-provider-basepath').value.trim(),
+                    description: document.getElementById('edit-provider-description').value.trim()
+                }
+            };
+            
+            if (!providerData.config.name) {
+                showNotification('Display name is required', 'error');
+                return;
+            }
+            if (!providerData.config.targetHost) {
+                showNotification('Target host is required', 'error');
+                return;
+            }
+            
+            showNotification('Updating provider...', 'loading');
+            try {
+                const response = await fetch(`/admin/providers/${providerId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(providerData)
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    if (newToken) {
+                        const tokenResponse = await fetch(`/admin/providers/${providerId}/token`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ token: newToken })
+                        });
+                        const tokenResult = await tokenResponse.json();
+                        if (!tokenResult.success) {
+                            clearLoadingNotification();
+                            showNotification('Provider updated but token save failed: ' + tokenResult.error, 'error');
+                            return;
+                        }
+                    }
+                    
+                    // Set as default if toggle is on
+                    if (isDefaultProvider && currentProviderId !== providerId) {
+                        // The backend should handle this, but for now we just update locally
+                        currentProviderId = providerId;
+                    }
+                    
+                    clearLoadingNotification();
+                    showNotification('Provider updated successfully', 'success');
+                    closeModal('edit-provider-modal');
+                    loadProviders();
+                } else {
+                    clearLoadingNotification();
+                    showNotification('Failed to update provider: ' + result.error, 'error');
+                }
+            } catch (error) {
+                clearLoadingNotification();
+                showNotification('Error updating provider: ' + error.message, 'error');
+            }
+        }
+
+        // ==================== Rendering Functions ====================
+
+        function renderProviderTable() {
+            const tbody = document.getElementById('provider-table-body');
+            const providerIds = Object.keys(providers);
+
+            if (providerIds.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">🔌</div>
+                                <div class="empty-state-title">No providers configured</div>
+                                <div class="empty-state-hint">Click "Add Provider" to configure a new provider</div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = providerIds.map(id => {
+                const provider = providers[id];
+                const isCurrent = id === currentProviderId;
+                const modelCount = provider.models ? provider.models.length : 0;
+                
+                return `
+                    <tr>
+                        <td>
+                            <div class="provider-cell">
+                                <div class="provider-icon">⚡</div>
+                                <div class="provider-info">
+                                    <div class="provider-name">${escapeHtml(provider.name)}</div>
+                                    <div class="provider-id">${escapeHtml(id)}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${escapeHtml(provider.targetHost)}</td>
+                        <td><span class="tag tag-purple">${escapeHtml(provider.protocol || 'openai')}</span></td>
+                        <td>
+                            <span class="models-tag" onclick="openConfigureModels('${id}')">
+                                <span class="models-tag-icon">⚡</span>
+                                <span>${modelCount} models</span>
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-badge ${isCurrent ? 'status-active' : 'status-inactive'}">
+                                <span class="status-dot"></span>
+                                ${isCurrent ? 'Active' : 'Inactive'}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon" title="Edit" onclick="editProvider('${id}')">✏️</button>
+                                <button class="btn-icon btn-danger" title="Delete" onclick="confirmDeleteProvider('${id}')" ${providerIds.length <= 1 ? 'disabled' : ''}>🗑️</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // ==================== UI Functions ====================
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function editProvider(providerId) {
+            const provider = providers[providerId];
+            if (!provider) {
+                showNotification('Provider not found', 'error');
+                return;
+            }
+            
+            editingProviderId = providerId;
+            isDefaultProvider = (providerId === currentProviderId);
+            
+            document.getElementById('edit-provider-id').value = providerId;
+            document.getElementById('edit-provider-id-display').value = providerId;
+            document.getElementById('edit-provider-name').value = provider.name || '';
+            document.getElementById('edit-provider-host').value = provider.targetHost || '';
+            document.getElementById('edit-provider-protocol').value = provider.protocol || 'openai';
+            document.getElementById('edit-provider-token').value = '';
+            document.getElementById('edit-provider-token').type = 'password';
+            
+            // Update toggle switch
+            const toggle = document.getElementById('edit-provider-default-toggle');
+            if (isDefaultProvider) {
+                toggle.classList.add('active');
+            } else {
+                toggle.classList.remove('active');
+            }
+            
+            openModal('edit-provider-modal');
+        }
+
+        function toggleDefaultProvider() {
+            isDefaultProvider = !isDefaultProvider;
+            const toggle = document.getElementById('edit-provider-default-toggle');
+            if (isDefaultProvider) {
+                toggle.classList.add('active');
+            } else {
+                toggle.classList.remove('active');
+            }
+        }
+
+        // ==================== Configure Models Functions ====================
+
+        let availableModels = []; // Store fetched models from API
+        let savedModels = []; // Store previously saved models
+        let currentFetchController = null; // AbortController for cancelling requests
+        let isFetching = false; // Prevent concurrent requests
+
+        async function openConfigureModels(providerId) {
+            const provider = providers[providerId];
+            if (!provider) {
+                showNotification('Provider not found', 'error');
+                return;
+            }
+
+            // Cancel any ongoing fetch
+            if (currentFetchController) {
+                currentFetchController.abort();
+                currentFetchController = null;
+            }
+
+            // Prevent concurrent requests
+            if (isFetching) {
+                console.log('[DEBUG] Fetch already in progress, ignoring duplicate request');
+                return;
+            }
+
+            configuringProviderId = providerId;
+            selectedModels = new Set();
+            expandedGroups = new Set(); // Will expand all groups by default after fetching
+            availableModels = [];
+            savedModels = [];
+
+            // Store previously saved models for reference
+            if (provider.models && Array.isArray(provider.models)) {
+                savedModels = provider.models;
+                // Initialize selected models from saved models
+                provider.models.forEach(model => {
+                    if (typeof model === 'string') {
+                        selectedModels.add(model);
+                    } else if (model.id) {
+                        selectedModels.add(model.id);
+                    }
+                });
+            }
+
+            // Update modal subtitle
+            document.getElementById('configure-models-subtitle').textContent = `Select models for ${provider.name}`;
+
+            // Open modal first to show loading state
+            openModal('configure-models-modal');
+            
+            // Show loading state
+            showLoadingState();
+            
+            // Fetch models from provider API with retry (max 2 attempts)
+            await fetchModelsFromProviderWithRetry(providerId, 2);
+        }
+
+        function showLoadingState() {
+            const container = document.getElementById('models-list');
+            container.innerHTML = `
+                <div class="empty-state" style="padding: 48px 32px;">
+                    <div class="empty-state-icon" style="animation: pulse 1.5s infinite;">⏳</div>
+                    <div class="empty-state-title">Loading models...</div>
+                    <div class="empty-state-hint">Fetching available models from provider API</div>
+                </div>
+            `;
+        }
+
+        function showErrorState(errorMessage) {
+            const container = document.getElementById('models-list');
+            container.innerHTML = `
+                <div class="empty-state" style="padding: 48px 32px;">
+                    <div class="empty-state-icon">❌</div>
+                    <div class="empty-state-title">Failed to load models</div>
+                    <div class="empty-state-hint">${escapeHtml(errorMessage)}</div>
+                    <button class="btn btn-primary" style="margin-top: 16px;" onclick="retryFetchModels()">
+                        <span>🔄</span>
+                        <span>Retry</span>
+                    </button>
+                </div>
+            `;
+        }
+
+        async function fetchModelsFromProviderWithRetry(providerId, maxRetries = 2) {
+            let lastError = null;
+            
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    console.log(`[DEBUG] Fetching models for provider: ${providerId}, attempt ${attempt}/${maxRetries}`);
+                    
+                    const result = await fetchModelsFromProvider(providerId);
+                    
+                    // Success - clear fetching flag and return
+                    isFetching = false;
+                    currentFetchController = null;
+                    return result;
+                    
+                } catch (error) {
+                    lastError = error;
+                    console.error(`[DEBUG] Attempt ${attempt} failed:`, error.message);
+                    
+                    // Don't retry if it's an abort error (user cancelled)
+                    if (error.name === 'AbortError') {
+                        console.log('[DEBUG] Request was aborted, not retrying');
+                        isFetching = false;
+                        currentFetchController = null;
+                        return;
+                    }
+                    
+                    // Don't retry on 4xx errors (client errors)
+                    if (error.status && error.status >= 400 && error.status < 500) {
+                        console.log('[DEBUG] Client error, not retrying');
+                        break;
+                    }
+                    
+                    // Wait before retrying (exponential backoff: 2s, 4s)
+                    if (attempt < maxRetries) {
+                        const delay = Math.min(2000 * Math.pow(2, attempt - 1), 6000);
+                        console.log(`[DEBUG] Retrying in ${delay}ms...`);
+                        
+                        // Show retrying state
+                        showRetryingState(attempt, maxRetries);
+                        await sleep(delay);
+                    }
+                }
+            }
+            
+            // All retries failed
+            isFetching = false;
+            currentFetchController = null;
+            console.error('[DEBUG] All retry attempts failed');
+            showErrorState(lastError?.message || 'Failed to load models after multiple attempts');
+            showNotification('Failed to fetch models: ' + (lastError?.message || 'Unknown error'), 'error');
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function showRetryingState(currentAttempt, maxAttempts) {
+            const container = document.getElementById('models-list');
+            container.innerHTML = `
+                <div class="empty-state" style="padding: 48px 32px;">
+                    <div class="empty-state-icon" style="animation: pulse 1.5s infinite;">🔄</div>
+                    <div class="empty-state-title">Retrying...</div>
+                    <div class="empty-state-hint">Attempt ${currentAttempt + 1} of ${maxAttempts}</div>
+                </div>
+            `;
+        }
+
+        async function fetchModelsFromProvider(providerId) {
+            isFetching = true;
+            
+            // Create AbortController for timeout (15 seconds - longer than backend 10s)
+            currentFetchController = new AbortController();
+            const timeoutId = setTimeout(() => {
+                console.log('[DEBUG] Request timeout, aborting...');
+                currentFetchController.abort();
+            }, 15000); // 15 second timeout
+            
+            try {
+                const response = await fetch(`/admin/providers/${providerId}/fetch-models`, {
+                    method: 'GET',
+                    cache: 'no-cache',
+                    signal: currentFetchController.signal
+                });
+
+                clearTimeout(timeoutId);
+                console.log(`[DEBUG] Fetch models response: ${response.status}`);
+
+                if (!response.ok) {
+                    const error = new Error(`HTTP error! status: ${response.status}`);
+                    error.status = response.status;
+                    const errorData = await response.json().catch(() => ({}));
+                    error.message = errorData.error || error.message;
+                    throw error;
+                }
+
+                const result = await response.json();
+                console.log('[DEBUG] Fetch models result:', result);
+
+                if (result.success && result.data && result.data.models) {
+                    // Transform API response to consistent format
+                    availableModels = transformApiModels(result.data.models);
+                    
+                    // Expand all groups by default
+                    const groups = groupModels(availableModels);
+                    expandedGroups = new Set(Object.keys(groups));
+                    
+                    // Render the models
+                    renderModelsList();
+                    updateSelectedCount();
+                    
+                    return result;
+                } else {
+                    throw new Error('Invalid response format from API');
+                }
+            } catch (error) {
+                clearTimeout(timeoutId);
+                throw error;
+            }
+        }
+
+        function transformApiModels(apiModels) {
+            // Handle different API response formats
+            if (!Array.isArray(apiModels)) {
+                console.warn('[DEBUG] API models is not an array:', apiModels);
+                return [];
+            }
+
+            return apiModels.map(model => {
+                // OpenAI format: { id: 'gpt-4', object: 'model', ... }
+                // Anthropic format: { id: 'claude-3', display_name: 'Claude 3', ... }
+                if (typeof model === 'string') {
+                    return {
+                        id: model,
+                        name: model,
+                        description: ''
+                    };
+                }
+
+                return {
+                    id: model.id || model.model || 'unknown',
+                    name: model.display_name || model.name || model.id || 'Unknown Model',
+                    description: model.description || ''
+                };
+            });
+        }
+
+        function retryFetchModels() {
+            if (configuringProviderId && !isFetching) {
+                showLoadingState();
+                fetchModelsFromProviderWithRetry(configuringProviderId, 3);
+            }
+        }
+
+        function renderModelsList() {
+            const container = document.getElementById('models-list');
+
+            if (!availableModels || availableModels.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="padding: 32px;">
+                        <div class="empty-state-icon">📦</div>
+                        <div class="empty-state-title">No models available</div>
+                        <div class="empty-state-hint">No models returned from provider API</div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Group models by their prefix (e.g., glm-4, glm-4-flash -> glm-4 group)
+            const modelGroups = groupModels(availableModels);
+
+            container.innerHTML = Object.entries(modelGroups).map(([groupName, models]) => {
+                const isExpanded = expandedGroups.has(groupName);
+                const allSelected = models.every(m => {
+                    return selectedModels.has(m.id);
+                });
+                const selectedCount = models.filter(m => {
+                    return selectedModels.has(m.id);
+                }).length;
+
+                return `
+                    <div class="model-group ${isExpanded ? 'expanded' : ''}" data-group="${escapeHtml(groupName)}">
+                        <div class="model-group-header" onclick="toggleModelGroup('${escapeHtml(groupName)}')">
+                            <div class="model-group-header-left">
+                                <span class="model-group-toggle">▼</span>
+                                <div class="model-group-icon">${getGroupIcon(groupName)}</div>
+                                <span class="model-group-name">${escapeHtml(groupName)}</span>
+                            </div>
+                            <div class="model-group-header-right">
+                                <span class="model-count-badge">${selectedCount} selected</span>
+                                <button class="btn-all-selected ${allSelected ? '' : 'not-selected'}" 
+                                        onclick="event.stopPropagation(); toggleSelectAllGroup('${escapeHtml(groupName)}')">
+                                    <span>${allSelected ? '✓' : ''}</span>
+                                    <span>${allSelected ? 'All Selected' : 'Select All'}</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="model-group-content">
+                            ${models.map(model => renderModelItem(model)).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function groupModels(models) {
+            const groups = {};
+
+            models.forEach(model => {
+                const modelId = model.id;
+                const modelName = model.name || model.id;
+
+                // Try to extract group name from model id (e.g., "glm-4-flash" -> "glm-4")
+                let groupName = modelId.split('-').slice(0, 2).join('-');
+                if (!groupName || groupName === modelId) {
+                    groupName = modelId.split('-')[0] || 'Other';
+                }
+
+                if (!groups[groupName]) {
+                    groups[groupName] = [];
+                }
+                groups[groupName].push({ ...model, displayId: modelId, displayName: modelName });
+            });
+
+            return groups;
+        }
+
+        function getGroupIcon(groupName) {
+            // Extract version number or use first letter
+            const match = groupName.match(/(\d+\.?\d*)/);
+            if (match) {
+                return match[1].substring(0, 3);
+            }
+            return groupName.substring(0, 2).toUpperCase();
+        }
+
+        function renderModelItem(model) {
+            const modelId = model.id;
+            const modelName = model.name || model.id;
+            const isSelected = selectedModels.has(modelId);
+
+            return `
+                <div class="model-item" data-model-id="${escapeHtml(modelId)}">
+                    <div class="model-item-left">
+                        <div class="model-checkbox ${isSelected ? 'checked' : ''}" 
+                             onclick="toggleModelSelection('${escapeHtml(modelId)}')"></div>
+                        <div class="model-info">
+                            <div class="model-name">${escapeHtml(modelName)}</div>
+                            <div class="model-id">${escapeHtml(modelId)}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleModelGroup(groupName) {
+            if (expandedGroups.has(groupName)) {
+                expandedGroups.delete(groupName);
+            } else {
+                expandedGroups.add(groupName);
+            }
+            renderModelsList();
+        }
+
+        function toggleModelSelection(modelId) {
+            if (selectedModels.has(modelId)) {
+                selectedModels.delete(modelId);
+            } else {
+                selectedModels.add(modelId);
+            }
+            renderModelsList();
+            updateSelectedCount();
+        }
+
+        function toggleSelectAllGroup(groupName) {
+            if (!availableModels || availableModels.length === 0) return;
+
+            const modelGroups = groupModels(availableModels);
+            const groupModels_list = modelGroups[groupName] || [];
+
+            const allSelected = groupModels_list.every(m => {
+                const modelId = m.id;
+                return selectedModels.has(modelId);
+            });
+
+            groupModels_list.forEach(m => {
+                const modelId = m.id;
+                if (allSelected) {
+                    selectedModels.delete(modelId);
+                } else {
+                    selectedModels.add(modelId);
+                }
+            });
+
+            renderModelsList();
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            document.getElementById('selected-models-count').textContent = selectedModels.size;
+        }
+
+        async function saveModelSelection() {
+            if (!configuringProviderId) return;
+
+            showNotification('Saving model selection...', 'loading');
+
+            try {
+                // Convert selected models back to the format expected by the provider
+                const selectedModelsArray = Array.from(selectedModels).map(modelId => {
+                    // Try to find the full model object from available models
+                    const availableModel = availableModels.find(m => m.id === modelId);
+                    if (availableModel) {
+                        return {
+                            id: availableModel.id,
+                            name: availableModel.name,
+                            description: availableModel.description
+                        };
+                    }
+                    // Fallback to saved models
+                    const savedModel = savedModels.find(m => {
+                        const id = typeof m === 'string' ? m : m.id;
+                        return id === modelId;
+                    });
+                    if (savedModel) {
+                        return typeof savedModel === 'string' 
+                            ? { id: savedModel, name: savedModel, description: '' }
+                            : savedModel;
+                    }
+                    // Final fallback
+                    return { id: modelId, name: modelId, description: '' };
+                });
+
+                const response = await fetch(`/admin/providers/${configuringProviderId}/models`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ models: selectedModelsArray })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    clearLoadingNotification();
+                    showNotification('Model selection saved successfully', 'success');
+                    closeModal('configure-models-modal');
+                    loadProviders();
+                } else {
+                    clearLoadingNotification();
+                    showNotification('Failed to save model selection: ' + result.error, 'error');
+                }
+            } catch (error) {
+                clearLoadingNotification();
+                showNotification('Error saving model selection: ' + error.message, 'error');
+            }
+        }
+
+        function toggleEditTokenVisibility() {
+            const input = document.getElementById('edit-provider-token');
+            const button = input.nextElementSibling;
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.textContent = 'Hide';
+            } else {
+                input.type = 'password';
+                button.textContent = 'Show';
+            }
+        }
+
+        function confirmDeleteProvider(providerId) {
+            const providerIds = Object.keys(providers);
+            if (providerIds.length <= 1) {
+                showNotification('Cannot delete the last provider', 'error');
+                return;
+            }
+
+            document.getElementById('confirm-message').textContent = `Delete provider "${escapeHtml(providers[providerId].name)}"?`;
+            document.getElementById('confirm-hint').textContent = 'This action cannot be undone.';
+            document.getElementById('confirm-btn').onclick = function() {
+                closeModal('confirm-modal');
+                deleteProvider(providerId);
+            };
+            openModal('confirm-modal');
+        }
+
+        function validateProviderForm() {
+            let isValid = true;
+
+            document.querySelectorAll('.form-error').forEach(el => el.textContent = '');
+            document.querySelectorAll('.form-input').forEach(el => el.classList.remove('error'));
+
+            const id = document.getElementById('provider-id').value.trim();
+            if (!id) {
+                showFieldError('provider-id', 'Provider ID is required');
+                isValid = false;
+            } else if (!/^[a-zA-Z0-9_-]+$/.test(id)) {
+                showFieldError('provider-id', 'Provider ID can only contain letters, numbers, underscores, and hyphens');
+                isValid = false;
+            } else if (providers[id]) {
+                showFieldError('provider-id', 'Provider ID already exists');
+                isValid = false;
+            }
+
+            const name = document.getElementById('provider-name').value.trim();
+            if (!name) {
+                showFieldError('provider-name', 'Display name is required');
+                isValid = false;
+            }
+
+            const host = document.getElementById('provider-host').value.trim();
+            if (!host) {
+                showFieldError('provider-host', 'Target host is required');
+                isValid = false;
+            } else if (!/^[a-zA-Z0-9][-a-zA-Z0-9.]*[a-zA-Z0-9]$/.test(host)) {
+                showFieldError('provider-host', 'Invalid host format');
+                isValid = false;
+            }
+
+            const basePath = document.getElementById('provider-basepath').value.trim();
+            if (!basePath) {
+                showFieldError('provider-basepath', 'Base path is required');
+                isValid = false;
+            } else if (!basePath.startsWith('/')) {
+                showFieldError('provider-basepath', 'Base path must start with /');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function showFieldError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const errorEl = document.getElementById(`${fieldId}-error`);
+            field.classList.add('error');
+            errorEl.textContent = message;
+        }
+
+        function submitAddProvider() {
+            if (!validateProviderForm()) return;
+
+            const providerData = {
+                id: document.getElementById('provider-id').value.trim(),
+                config: {
+                    name: document.getElementById('provider-name').value.trim(),
+                    targetHost: document.getElementById('provider-host').value.trim(),
+                    targetProtocol: 'https',
+                    protocol: document.getElementById('provider-protocol').value,
+                    basePath: document.getElementById('provider-basepath').value.trim(),
+                    description: document.getElementById('provider-description').value.trim(),
+                    apiToken: '',
+                    models: []
+                }
+            };
+
+            addProvider(providerData);
+        }
+
+        function exportConfig() {
+            showNotification('Exporting configuration...', 'loading');
+            fetch('/admin/config')
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        const dataStr = JSON.stringify(result.data, null, 2);
+                        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                        const url = URL.createObjectURL(dataBlob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = 'api-gateway-config.json';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(url);
+                        showNotification('Configuration exported successfully', 'success');
+                    } else {
+                        showNotification('Failed to export configuration', 'error');
+                    }
+                })
+                .catch(error => {
+                    showNotification('Error exporting configuration: ' + error.message, 'error');
+                });
+        }
+
+        // ==================== Notification System ====================
+        let loadingNotificationId = null;
+
+        function showNotification(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('notification-container');
+            const id = 'notif-' + Date.now();
+
+            // Clear previous loading notification if exists
+            if (type === 'loading' && loadingNotificationId) {
+                removeNotification(loadingNotificationId);
+            }
+
+            const icons = {
+                success: '✅',
+                error: '❌',
+                loading: '⏳',
+                info: 'ℹ️'
+            };
+
+            const titles = {
+                success: 'Success',
+                error: 'Error',
+                loading: 'Loading',
+                info: 'Info'
+            };
+
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.id = id;
+            notification.innerHTML = `
+                <span class="notification-icon">${icons[type] || icons.info}</span>
+                <div class="notification-content">
+                    <div class="notification-title">${titles[type] || titles.info}</div>
+                    <div class="notification-message">${escapeHtml(message)}</div>
+                </div>
+                <button class="notification-close" onclick="removeNotification('${id}')">&times;</button>
+            `;
+
+            container.appendChild(notification);
+
+            // Track loading notification
+            if (type === 'loading') {
+                loadingNotificationId = id;
+            }
+
+            if (type !== 'loading' && duration > 0) {
+                setTimeout(() => removeNotification(id), duration);
+            }
+
+            return id;
+        }
+
+        function clearLoadingNotification() {
+            if (loadingNotificationId) {
+                removeNotification(loadingNotificationId);
+                loadingNotificationId = null;
+            }
+        }
+
+        function removeNotification(id) {
+            const notification = document.getElementById(id);
+            if (notification) {
+                notification.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => notification.remove(), 300);
+            }
+        }
+
+        // ==================== Utility Functions ====================
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Close modals on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
