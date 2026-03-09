@@ -211,10 +211,11 @@ agent-debug-hub/
 │   ├── index.html         # 调试界面
 │   ├── chat.html          # 聊天界面
 │   └── admin.html         # 管理控制台
-├── pics/
-│   ├── chat.png           # Chat页面截图
-│   ├── admin.png          # Admin页面截图
-│   └── debug.png          # Debug页面截图
+├── docs/
+│   └── pics/
+│       ├── chat.png           # Chat页面截图
+│       ├── admin.png          # Admin页面截图
+│       └── debug.png          # Debug页面截图
 ├── config.json            # 配置文件
 ├── package.json
 ├── tsconfig.json
@@ -327,19 +328,19 @@ API信息:  http://localhost:27980/api/info
 以下是项目的三个关键页面截图，展示了主要功能和用户界面：
 
 ### Chat 页面
-![Chat 页面](pics/chat.png)
+![Chat 页面](docs/pics/chat.png)
 - **功能**：提供AI聊天交互界面
 - **特点**：支持消息输入、对话历史显示、响应实时更新
 - **适用场景**：用户与AI模型的直接对话交互
 
 ### Admin 页面
-![Admin 页面](pics/admin.png)
+![Admin 页面](docs/pics/admin.png)
 - **功能**：管理控制台和配置界面
 - **特点**：供应商管理、配置编辑、系统状态监控
 - **适用场景**：系统管理员进行配置管理和监控
 
 ### Debug 页面
-![Debug 页面](pics/debug.png)
+![Debug 页面](docs/pics/debug.png)
 - **功能**：请求监控和调试界面
 - **特点**：实时请求记录、响应数据查看、API调用分析
 - **适用场景**：开发人员调试API调用和查看请求详情
