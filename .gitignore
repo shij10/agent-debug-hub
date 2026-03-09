@@ -37,3 +37,7 @@ config.json
 
 # Jest
 .jest-cache/
+
+# IDE/Tool generated files
+.figma/
+.trae/
